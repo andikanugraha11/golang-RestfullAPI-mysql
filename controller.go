@@ -73,3 +73,65 @@ func insertUsersMultipart(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 
 }
+
+func updateUsersMultipart(w http.ResponseWriter, r *http.Request) {
+	var response Response
+	db := connect()
+	defer db.Close()
+
+	err := r.ParseMultipartForm(4096)
+	if err != nil {
+		panic(err)
+	}
+
+	ID := r.FormValue("id")
+	name := r.FormValue("name")
+	age := r.FormValue("age")
+
+	_, err = db.Exec("UPDATE users set name = ?, age = ? where id = ?",
+		name,
+		age,
+		ID,
+	)
+
+	if err != nil {
+		log.Print(err)
+	}
+
+	response.Status = 1
+	response.Message = "Success Update Data"
+	log.Print("Update data to database")
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+
+}
+
+func deleteUsersMultipart(w http.ResponseWriter, r *http.Request) {
+	var response Response
+	db := connect()
+	defer db.Close()
+
+	err := r.ParseMultipartForm(4096)
+	if err != nil {
+		panic(err)
+	}
+
+	ID := r.FormValue("id")
+
+	_, err = db.Exec("DELETE from person where id = ?",
+		ID,
+	)
+
+	if err != nil {
+		log.Print(err)
+	}
+
+	response.Status = 1
+	response.Message = "Success Delete Data"
+	log.Print("Delete data to database")
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+
+}
