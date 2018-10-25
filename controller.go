@@ -35,3 +35,41 @@ func returnAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
+
+func insertUsersMultipart(w http.ResponseWriter, r *http.Request) {
+
+	var response Response
+
+	db := connect()
+	defer db.Close()
+
+	err := r.ParseMultipartForm(4096)
+	if err != nil {
+		panic(err)
+	}
+
+	// Form-data
+	name := r.FormValue("name")
+	age := r.FormValue("age")
+
+	// x-www-form-urlencoded
+	// name := r.Form.Get("name")
+	// age := r.Form.Get("age")
+
+	_, err = db.Exec("INSERT INTO users (name, age) values (?,?)",
+		name,
+		age,
+	)
+
+	if err != nil {
+		log.Print(err)
+	}
+
+	response.Status = 1
+	response.Message = "Success"
+	log.Print("Insert data to database")
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+
+}
